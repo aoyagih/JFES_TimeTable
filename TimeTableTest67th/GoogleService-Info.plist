@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>741521352051-13dcjv50sj6dtra50tok9j3aafqd641s.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.741521352051-13dcjv50sj6dtra50tok9j3aafqd641s</string>
+	<key>API_KEY</key>
+	<string>AIzaSyDVe6Pe5-223kNN9OIDFoVqss3Xp_7B_EA</string>
+	<key>GCM_SENDER_ID</key>
+	<string>741521352051</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.aoyagih.TimeTableTest67th</string>
+	<key>PROJECT_ID</key>
+	<string>timetabletest67th</string>
+	<key>STORAGE_BUCKET</key>
+	<string>timetabletest67th.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:741521352051:ios:3ac70fea714ef5fccc9106</string>
+	<key>DATABASE_URL</key>
+	<string>https://timetabletest67th.firebaseio.com</string>
+</dict>
+</plist>
