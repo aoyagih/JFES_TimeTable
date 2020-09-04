@@ -1,6 +1,12 @@
 # JFES_TimeTable
+### 説明 
 Firebaseで取得したフェスのデータを、タイムテーブル形式でSpreadsheetViewに表示させるアプリ
 
+### スクリーンショット
+<img src="screenshot1.png" width="250">  
+
+  
+    
 ### 参考アプリ
 Jフェス - ロッキング・オンのフェス公式アプリ (J-FES.)  
 https://fesapp.jp/  
