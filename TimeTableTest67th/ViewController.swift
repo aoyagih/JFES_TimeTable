@@ -14,6 +14,11 @@ class ViewController: UIViewController, SpreadsheetViewDataSource, SpreadsheetVi
 
     let db = Firestore.firestore()
     
+    //すべてのドキュメントを見てcellの結合場所を得る
+    var from_hour: [Int] = [Int]() //開始時間
+    var index: [Int] = [Int]()     //column
+    var to_hour: [Int] = [Int]()   //終了時間
+    
     var dictionary: [String:String] = [String:String]()
     
     @IBOutlet weak var spreadsheetView: SpreadsheetView!
@@ -35,61 +40,8 @@ class ViewController: UIViewController, SpreadsheetViewDataSource, SpreadsheetVi
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         
-        //TODO:
-        //すべてのドキュメントを見て辞書を作成する
-        db.collection("timetableData").whereField("day", isEqualTo: 1)
-            .getDocuments() { (querySnapshot, err) in
-                if let err = err {
-                    print("Error getting documents: \(err)")
-                } else {
-                    for document in querySnapshot!.documents {
-                        print("\(document.documentID)")
-                        print(document.get("artist_name") as! String)
-                        self.dictionary[document.documentID] = (document.get("artist_name") as! String)
-                    }
-                }
-        }
-        
-        //            dictionary["1-1-61"] = "欅坂46"
-        //            dictionary["1-1-136"] = "ヤバいTシャツ屋さん"
-        //            dictionary["1-1-211"] = "King Gnu"
-        //            dictionary["1-1-286"] = "BABYMETAL"
-        //            dictionary["1-1-361"] = "Official髭男dism"
-        //            dictionary["1-2-61"] = "ゴールデンボンバー"
-        
-        
-//        // Add a new document with a generated ID
-//        let docData: [String: Any] = [
-//            "artist_name": "ゴールデンボンバー",
-//            "day": 1,
-//            "end_time": 101,
-//            "index": 2,
-//            "start_time": 61,
-//            "time": "12:00-12:40",
-//        ]
-//        db.collection("timetableData").document("1-2-61").setData(docData) { err in
-//            if let err = err {
-//                print("Error writing document: \(err)")
-//            } else {
-//                print("Document successfully written!")
-//            }
-//        }
-//
-//        let docData2: [String: Any] = [
-//            "artist_name": "sumika",
-//            "day": 2,
-//            "end_time": 111,
-//            "index": 1,
-//            "start_time": 61,
-//            "time": "12:00-12:50",
-//        ]
-//        db.collection("timetableData").document("2-1-61").setData(docData2) { err in
-//            if let err = err {
-//                print("Error writing document: \(err)")
-//            } else {
-//                print("Document successfully written!")
-//            }
-//        }
+        loadDataFromFirebase()
+
         
         spreadsheetView.dataSource = self
         spreadsheetView.delegate = self
@@ -124,6 +76,43 @@ class ViewController: UIViewController, SpreadsheetViewDataSource, SpreadsheetVi
         spreadsheetView.flashScrollIndicators()
     }
 
+    //firebaseからデータを持ってくる(時間がかかる処理)
+    func loadDataFromFirebase(){
+        //TODO:
+        //すべてのドキュメントを見て辞書を作成する
+        db.collection("timetableData").whereField("day", isEqualTo: 1)
+            .getDocuments() { (querySnapshot, err) in
+                if let err = err {
+                    print("Error getting documents: \(err)")
+                } else {
+                    for document in querySnapshot!.documents {
+                        print("\(document.documentID)")
+                        print(document.get("artist_name") as! String)
+                        self.dictionary[document.documentID] = (document.get("artist_name") as! String)
+                    }
+                }
+        }
+        
+        db.collection("timetableData").whereField("day", isEqualTo: 1)
+            .getDocuments() { (querySnapshot, err) in
+                if let err = err {
+                    print("Error getting documents: \(err)")
+                } else {
+                    for document in querySnapshot!.documents {
+                        self.from_hour.append(document.get("start_time") as! Int)
+                        self.index.append(document.get("index") as! Int)
+                        self.to_hour.append(document.get("end_time") as! Int)
+                        print((document.get("start_time") as! Int) + (document.get("index") as! Int))
+                        print("count = \(self.from_hour.count), \(self.index.count)")
+                    }
+                    self.spreadsheetView.reloadData()
+                }
+        }
+        
+    }
+    
+    
+    
     // MARK: DataSource
 
     func numberOfColumns(in spreadsheetView: SpreadsheetView) -> Int {
@@ -160,38 +149,16 @@ class ViewController: UIViewController, SpreadsheetViewDataSource, SpreadsheetVi
     func mergedCells(in spreadsheetView: SpreadsheetView) -> [CellRange] {
         var mergedCells = [CellRange]()
 
+        //左端の11時台, 12時台などの1時間ごとのセル
         for row in 0..<11 {
             mergedCells.append(CellRange(from: (60 * row + 1, 0), to: (60 * (row + 1), 0)))
         }
         
-        
-        //すべてのドキュメントを見てcellの結合場所を得る
-        var from_hour: [Int] = [Int]() //開始時間
-        var index: [Int] = [Int]()     //column
-        var to_hour: [Int] = [Int]()   //終了時間
-        
-        //時間がかかる処理
-        db.collection("timetableData").whereField("day", isEqualTo: 1)
-            .getDocuments() { (querySnapshot, err) in
-                if let err = err {
-                    print("Error getting documents: \(err)")
-                } else {
-                    for document in querySnapshot!.documents {
-                        from_hour.append(document.get("start_time") as! Int)
-                        index.append(document.get("index") as! Int)
-                        to_hour.append(document.get("end_time") as! Int)
-                        print((document.get("start_time") as! Int) + (document.get("index") as! Int))
-                        print("count = \(from_hour.count), \(index.count)")
-                    }
-                    for i in 0..<from_hour.count{
-                        mergedCells.append(CellRange(from: (from_hour[i], index[i]), to: (to_hour[i], index[i])))
-                        self.slotInfo[IndexPath(row: from_hour[i], column: index[i])] = (from_hour[i]-1, to_hour[i]-from_hour[i])
-                    }
-                }
-                print("先: マージしてから")
-                
+        //左端以外のセル
+        for i in 0..<self.from_hour.count{
+            mergedCells.append(CellRange(from: (from_hour[i], index[i]), to: (to_hour[i], index[i])))
+            self.slotInfo[IndexPath(row: from_hour[i], column: index[i])] = (from_hour[i]-1, to_hour[i]-from_hour[i])
         }
-        
         
         return mergedCells
     }
@@ -224,10 +191,6 @@ class ViewController: UIViewController, SpreadsheetViewDataSource, SpreadsheetVi
             return cell
         }
 
-        print("後: セルのデザイン生成start")
-        print(slotInfo.count)
-        print(slotInfo)
-        
         //それ以外
         if let (minutes, duration) = slotInfo[indexPath] {
            
@@ -240,7 +203,6 @@ class ViewController: UIViewController, SpreadsheetViewDataSource, SpreadsheetVi
             cell.tableHighlight = duration > 20 ? "紹介文" : ""
             return cell
         }
-        print("後: セルのデザイン生成end")
         
         return spreadsheetView.dequeueReusableCell(withReuseIdentifier: String(describing: BlankCell.self), for: indexPath)
     }
@@ -273,6 +235,41 @@ class ViewController: UIViewController, SpreadsheetViewDataSource, SpreadsheetVi
         present(alert, animated: true, completion: nil)
     }
 
+    //データをFirebaseに追加する処理
+    func addDataToFirebase(){
+        // Add a new document with a generated ID
+        let docData: [String: Any] = [
+            "artist_name": "ゴールデンボンバー",
+            "day": 1,
+            "end_time": 101,
+            "index": 2,
+            "start_time": 61,
+            "time": "12:00-12:40",
+        ]
+        db.collection("timetableData").document("1-2-61").setData(docData) { err in
+            if let err = err {
+                print("Error writing document: \(err)")
+            } else {
+                print("Document successfully written!")
+            }
+        }
+
+        let docData2: [String: Any] = [
+            "artist_name": "sumika",
+            "day": 2,
+            "end_time": 111,
+            "index": 1,
+            "start_time": 61,
+            "time": "12:00-12:50",
+        ]
+        db.collection("timetableData").document("2-1-61").setData(docData2) { err in
+            if let err = err {
+                print("Error writing document: \(err)")
+            } else {
+                print("Document successfully written!")
+            }
+        }
+    }
 
 }
 
